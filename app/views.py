@@ -16,9 +16,24 @@ from werkzeug.utils import secure_filename
 # Routing for your application.
 ###
 
-@app.route('/')
-def index():
-    return jsonify(message="This is the beginning of our API")
+@app.route('/api/upload', methods=['POST'])
+def upload():
+    upform=UploadForm()
+    if request.method == 'POST' and upform.validate_on_submit():
+        description = upform.description.data
+        photo = upform.photo.data
+        filename = secure_filename(photo.filename)
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        upload = {
+            "message": "File Upload Successful",
+            "filename": filename,
+            "description": description
+        }
+        return jsonify(upload=upload)
+
+    return jsonify(form_errors(upform))
+
 
 
 ###
